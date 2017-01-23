@@ -23,7 +23,7 @@ final class LoginViewController: UIViewController {
 
         sender.isEnabled = false
 
-        WallabagApi.requestToken() { success in
+        WallabagApi.requestToken { success in
             if success {
                 let newServer = NSEntityDescription.insertNewObject(forEntityName: "Server", into: CoreData.context) as! Server
 

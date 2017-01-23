@@ -68,7 +68,7 @@ final class ArticlesTableViewController: UITableViewController {
         alertController.addTextField(configurationHandler: { textField in
             textField.placeholder = "Url"
         })
-        alertController.addAction(UIAlertAction(title: "Add", style: .default, handler: { alert in
+        alertController.addAction(UIAlertAction(title: "Add", style: .default, handler: { _ in
             if let textfield = alertController.textFields?.first?.text {
                 if let url = URL(string: textfield) {
                     WallabagApi.addArticle(url) { article in
@@ -135,12 +135,12 @@ final class ArticlesTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         let article = self.articlesManager.getArticle(atIndex: indexPath.row)
 
-        let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete", handler: { action, indexPath in
+        let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete", handler: { _, indexPath in
             self.delete(article, indexPath: indexPath)
         })
         deleteAction.backgroundColor = #colorLiteral(red: 1, green: 0.231372549, blue: 0.188235294, alpha: 1)
 
-        let starAction = UITableViewRowAction(style: .default, title: article.is_starred ? "Unstar" : "Star", handler: { action, indexPath in
+        let starAction = UITableViewRowAction(style: .default, title: article.is_starred ? "Unstar" : "Star", handler: { _, indexPath in
             self.tableView.setEditing(false, animated: true)
             WallabagApi.patchArticle(article, withParamaters: ["starred": (!article.is_starred).hashValue]) { article in
                 self.articlesManager.update(article: article, at: indexPath.row)
@@ -149,7 +149,7 @@ final class ArticlesTableViewController: UITableViewController {
         })
         starAction.backgroundColor = #colorLiteral(red: 1, green: 0.584313725, blue: 0, alpha: 1)
 
-        let readAction = UITableViewRowAction(style: .default, title: article.is_archived ? "Unread" : "Read", handler: { action, indexPath in
+        let readAction = UITableViewRowAction(style: .default, title: article.is_archived ? "Unread" : "Read", handler: { _, indexPath in
             self.tableView.setEditing(false, animated: true)
             WallabagApi.patchArticle(article, withParamaters: ["archive": (!article.is_archived).hashValue]) { article in
                 self.articlesManager.update(article: article, at: indexPath.row)

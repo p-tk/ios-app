@@ -69,7 +69,7 @@ final class WallabagApi {
         configured = true
     }
 
-    static func requestToken(_ completion: @escaping(_ success: Bool) -> ()) {
+    static func requestToken(_ completion: @escaping(_ success: Bool) -> Void) {
         let parameters = ["grant_type": "password", "client_id": clientId!, "client_secret": clientSecret!, "username": username!, "password": password!]
 
         Alamofire.request(endpoint! + "/oauth/v2/token", method: .post, parameters: parameters).validate().responseJSON { response in
@@ -105,7 +105,7 @@ final class WallabagApi {
 
     // MARK: - Article
     static func patchArticle(_ article: Article, withParamaters withParameters: [String: Any], completion: @escaping(_ article: Article) -> Void) {
-        requestWithToken() { token in
+        requestWithToken { token in
             var parameters: [String: Any] = ["access_token": token.access_token]
             parameters = parameters.merge(dict: withParameters)
 
@@ -118,16 +118,16 @@ final class WallabagApi {
     }
 
     static func deleteArticle(_ article: Article, completion: @escaping() -> Void) {
-        requestWithToken() { token in
+        requestWithToken { token in
             let parameters: [String: Any] = ["access_token": token.access_token]
-            Alamofire.request(endpoint! + "/api/entries/" + String(article.id), method: .delete, parameters: parameters).responseJSON { response in
+            Alamofire.request(endpoint! + "/api/entries/" + String(article.id), method: .delete, parameters: parameters).responseJSON { _ in
                 completion()
             }
         }
     }
 
     static func addArticle(_ url: URL, completion: @escaping(_ article: Article) -> Void) {
-        requestWithToken() { token in
+        requestWithToken { token in
             let parameters: [String: Any] = ["access_token": token.access_token, "url": url.absoluteString]
 
             Alamofire.request(endpoint! + "/api/entries", method: .post, parameters: parameters).responseJSON { response in
@@ -139,7 +139,7 @@ final class WallabagApi {
     }
 
     static func retrieveArticle(page: Int = 1, withParameters: [String: Any] = [:], _ completion: @escaping([Article]) -> Void) {
-        requestWithToken() { token in
+        requestWithToken { token in
             var parameters: [String: Any] = ["access_token": token.access_token, "perPage": 20, "page": page]
             parameters = parameters.merge(dict: withParameters).merge(dict: getRetrieveMode())
 
