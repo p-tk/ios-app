@@ -140,18 +140,18 @@ final class ArticlesTableViewController: UITableViewController {
         })
         deleteAction.backgroundColor = #colorLiteral(red: 1, green: 0.231372549, blue: 0.188235294, alpha: 1)
 
-        let starAction = UITableViewRowAction(style: .default, title: article.is_starred ? "Unstar" : "Star", handler: { _, indexPath in
+        let starAction = UITableViewRowAction(style: .default, title: article.isStarred ? "Unstar" : "Star", handler: { _, indexPath in
             self.tableView.setEditing(false, animated: true)
-            WallabagApi.patchArticle(article, withParamaters: ["starred": (!article.is_starred).hashValue]) { article in
+            WallabagApi.patchArticle(article, withParamaters: ["starred": (!article.isStarred).hashValue]) { article in
                 self.articlesManager.update(article: article, at: indexPath.row)
                 self.tableView.reloadRows(at: [indexPath], with: .automatic)
             }
         })
         starAction.backgroundColor = #colorLiteral(red: 1, green: 0.584313725, blue: 0, alpha: 1)
 
-        let readAction = UITableViewRowAction(style: .default, title: article.is_archived ? "Unread" : "Read", handler: { _, indexPath in
+        let readAction = UITableViewRowAction(style: .default, title: article.isArchived ? "Unread" : "Read", handler: { _, indexPath in
             self.tableView.setEditing(false, animated: true)
-            WallabagApi.patchArticle(article, withParamaters: ["archive": (!article.is_archived).hashValue]) { article in
+            WallabagApi.patchArticle(article, withParamaters: ["archive": (!article.isArchived).hashValue]) { article in
                 self.articlesManager.update(article: article, at: indexPath.row)
                 self.tableView.reloadRows(at: [indexPath], with: .automatic)
             }

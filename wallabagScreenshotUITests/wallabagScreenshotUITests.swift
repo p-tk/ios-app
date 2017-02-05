@@ -4,7 +4,7 @@
 
 import XCTest
 
-class snapshotUITests: XCTestCase {
+class SnapshotUITests: XCTestCase {
 
     override func setUp() {
         super.setUp()

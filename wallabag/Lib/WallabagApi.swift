@@ -32,15 +32,15 @@ enum RetrieveMode: String {
 final class WallabagApi {
 
     fileprivate struct Token {
-        let expires_in: Int
-        let access_token: String
+        let expiresIn: Int
+        let accessToken: String
         let expiresDate: Date
 
-        init(expires_in: Int, access_token: String) {
-            self.expires_in = expires_in
-            self.access_token = access_token
+        init(expiresIn: Int, accessToken: String) {
+            self.expiresIn = expiresIn
+            self.accessToken = accessToken
 
-            expiresDate = Calendar.current.date(byAdding: .second, value: expires_in - 60, to: Date())!
+            expiresDate = Calendar.current.date(byAdding: .second, value: expiresIn - 60, to: Date())!
         }
 
         func isValid() -> Bool {
@@ -77,15 +77,16 @@ final class WallabagApi {
                 completion(false)
             }
 
-            if let result = response.result.value {
-                let JSON = result as! [String: Any]
-                if let token = JSON["access_token"] as? String {
-                    self.token = Token(expires_in: JSON["expires_in"] as! Int, access_token: token)
-                    completion(true)
-                } else {
-                    completion(false)
-                }
+            guard let result = response.result.value,
+                let JSON = result as? [String: Any],
+                let token = JSON["access_token"] as? String,
+                let expire = JSON["expires_in"] as? Int else {
+                completion(false)
+                return
             }
+
+            self.token = Token(expiresIn: expire, accessToken: token)
+            completion(true)
         }
     }
 
@@ -106,7 +107,7 @@ final class WallabagApi {
     // MARK: - Article
     static func patchArticle(_ article: Article, withParamaters withParameters: [String: Any], completion: @escaping(_ article: Article) -> Void) {
         requestWithToken { token in
-            var parameters: [String: Any] = ["access_token": token.access_token]
+            var parameters: [String: Any] = ["access_token": token.accessToken]
             parameters = parameters.merge(dict: withParameters)
 
             Alamofire.request(endpoint! + "/api/entries/" + String(article.id), method: .patch, parameters: parameters).responseJSON { response in
@@ -119,7 +120,7 @@ final class WallabagApi {
 
     static func deleteArticle(_ article: Article, completion: @escaping() -> Void) {
         requestWithToken { token in
-            let parameters: [String: Any] = ["access_token": token.access_token]
+            let parameters: [String: Any] = ["access_token": token.accessToken]
             Alamofire.request(endpoint! + "/api/entries/" + String(article.id), method: .delete, parameters: parameters).responseJSON { _ in
                 completion()
             }
@@ -128,7 +129,7 @@ final class WallabagApi {
 
     static func addArticle(_ url: URL, completion: @escaping(_ article: Article) -> Void) {
         requestWithToken { token in
-            let parameters: [String: Any] = ["access_token": token.access_token, "url": url.absoluteString]
+            let parameters: [String: Any] = ["access_token": token.accessToken, "url": url.absoluteString]
 
             Alamofire.request(endpoint! + "/api/entries", method: .post, parameters: parameters).responseJSON { response in
                 if let JSON = response.result.value as? [String: Any] {
@@ -140,7 +141,7 @@ final class WallabagApi {
 
     static func retrieveArticle(page: Int = 1, withParameters: [String: Any] = [:], _ completion: @escaping([Article]) -> Void) {
         requestWithToken { token in
-            var parameters: [String: Any] = ["access_token": token.access_token, "perPage": 20, "page": page]
+            var parameters: [String: Any] = ["access_token": token.accessToken, "perPage": 20, "page": page]
             parameters = parameters.merge(dict: withParameters).merge(dict: getRetrieveMode())
 
             var articles = [Article]()
@@ -149,7 +150,7 @@ final class WallabagApi {
                 if let result = response.result.value {
                     if let JSON = result as? [String: Any] {
                         if let embedded = JSON["_embedded"] as? [String: Any] {
-                            for item in embedded["items"] as! [[String: Any]] {
+                            for item in (embedded["items"] as? [[String: Any]])! {
                                 articles.append(Article(fromDictionary: item))
                             }
                         }
